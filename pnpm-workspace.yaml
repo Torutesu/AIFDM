@@ -3,6 +3,7 @@ allowBuilds:
   esbuild: set this to true or false
   msgpackr-extract: set this to true or false
   prisma: true
+  protobufjs: true
   sharp: false
   unrs-resolver: false
   workerd: set this to true or false
