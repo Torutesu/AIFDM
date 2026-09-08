@@ -1,5 +1,6 @@
-import { getActiveBrain } from "@/lib/brain/queries";
+import { getActiveBrain, getIntegration } from "@/lib/brain/queries";
 import { FactCard } from "./fact-card";
+import { GscPanel } from "./gsc-panel";
 import Link from "next/link";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -20,25 +21,14 @@ export default async function BrainPage({
 }) {
   const { workspaceId } = await params;
   const { workspace, brain } = await getActiveBrain(workspaceId);
+  const integration = await getIntegration(workspaceId);
 
-  if (!brain) {
-    return (
-      <div className="max-w-2xl space-y-4">
-        <Link href="/dashboard/websites" className="text-sm text-neutral-500">
-          ← Websites
-        </Link>
-        <h1 className="text-xl font-semibold tracking-tight">{workspace.name}</h1>
-        <p className="text-sm text-neutral-500">
-          No knowledge base yet. It builds automatically after the crawl finishes.
-        </p>
-      </div>
-    );
-  }
-
-  const grouped = ORDER.map((category) => ({
-    category,
-    facts: brain.facts.filter((f) => f.category === category),
-  })).filter((g) => g.facts.length > 0);
+  const grouped = brain
+    ? ORDER.map((category) => ({
+        category,
+        facts: brain.facts.filter((f) => f.category === category),
+      })).filter((g) => g.facts.length > 0)
+    : [];
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -50,15 +40,26 @@ export default async function BrainPage({
           <h1 className="text-xl font-semibold tracking-tight">
             {workspace.name}
           </h1>
-          <span className="text-xs text-neutral-500">
-            v{brain.version} · {brain.facts.length} facts
-          </span>
+          {brain ? (
+            <span className="text-xs text-neutral-500">
+              v{brain.version} · {brain.facts.length} facts
+            </span>
+          ) : null}
         </div>
         <p className="text-sm text-neutral-500">
           Click any fact to correct it. Corrections are locked and survive future
           rebuilds.
         </p>
       </div>
+
+      <GscPanel workspaceId={workspaceId} integration={integration} />
+
+      {!brain ? (
+        <p className="text-sm text-neutral-500">
+          No knowledge base yet. It builds automatically after the crawl
+          finishes.
+        </p>
+      ) : null}
 
       {grouped.map((group) => (
         <section key={group.category} className="space-y-2">

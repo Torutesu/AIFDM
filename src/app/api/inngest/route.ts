@@ -3,8 +3,9 @@ import { inngest } from "@/inngest/client";
 import { helloWorld } from "@/inngest/functions/hello";
 import { crawlWebsite } from "@/inngest/functions/crawl-website";
 import { buildBrain } from "@/inngest/functions/build-brain";
+import { syncGsc } from "@/inngest/functions/sync-gsc";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [helloWorld, crawlWebsite, buildBrain],
+  functions: [helloWorld, crawlWebsite, buildBrain, syncGsc],
 });

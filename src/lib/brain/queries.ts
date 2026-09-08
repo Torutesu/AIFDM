@@ -43,3 +43,15 @@ export async function updateFact(
     },
   });
 }
+
+export async function getIntegration(workspaceId: string) {
+  const { organizationId } = await requireOrg();
+
+  return db.integration.findFirst({
+    where: {
+      workspaceId,
+      provider: "google_search_console",
+      workspace: { organizationId },
+    },
+  });
+}
