@@ -55,6 +55,7 @@ model Workspace {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   websites       Website[]
+    brains         Brain[]
 
   @@index([organizationId])
 }
@@ -104,4 +105,75 @@ enum CrawlStatus {
   RUNNING
   COMPLETED
   FAILED
+}
+
+model UsageRecord {
+  id           String   @id @default(uuid())
+  provider     String
+  model        String
+  operation    String
+  inputTokens  Int
+  outputTokens Int
+  costCents    Float
+  createdAt    DateTime @default(now())
+
+  organizationId String?
+  workspaceId    String?
+
+  @@index([organizationId, createdAt])
+}
+
+model Brain {
+  id          String       @id @default(uuid())
+  version     Int
+  status      BrainStatus  @default(DRAFT)
+  generatedAt DateTime     @default(now())
+
+  workspaceId String
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  facts       BrainFact[]
+
+  @@unique([workspaceId, version])
+  @@index([workspaceId, status])
+}
+
+model BrainFact {
+  id           String       @id @default(uuid())
+  category     FactCategory
+  key          String
+  value        String
+  confidence   Float        @default(0.5)
+  sourceType   SourceType   @default(INFERENCE)
+  sourceUrls   String[]
+  isUserLocked Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  brainId      String
+  brain        Brain        @relation(fields: [brainId], references: [id], onDelete: Cascade)
+
+  @@index([brainId, category])
+}
+
+enum BrainStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+}
+
+enum FactCategory {
+  PRODUCT
+  AUDIENCE
+  POSITIONING
+  COMPETITOR
+  VOICE
+  CONSTRAINT
+}
+
+enum SourceType {
+  CRAWL
+  SEARCH
+  USER
+  INFERENCE
 }

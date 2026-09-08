@@ -52,7 +52,7 @@ export const crawlWebsite = inngest.createFunction(
         }
       });
 
-      await step.run("mark-complete", async () => {
+           await step.run("mark-complete", async () => {
         await db.website.update({
           where: { id: websiteId },
           data: {
@@ -61,6 +61,11 @@ export const crawlWebsite = inngest.createFunction(
             lastCrawledAt: new Date(),
           },
         });
+      });
+
+      await step.sendEvent("trigger-brain", {
+        name: "brain/build.requested",
+        data: { websiteId },
       });
 
       return { pageCount: docs.length };
