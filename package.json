@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.1",
+    "@mendable/firecrawl-js": "^4.38.0",
     "@prisma/adapter-neon": "^7.10.0",
     "@prisma/client": "7.10.0",
     "inngest": "^4.20.0",
