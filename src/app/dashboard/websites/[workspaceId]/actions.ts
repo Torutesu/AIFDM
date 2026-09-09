@@ -14,6 +14,7 @@ import {
   publishDraftById,
   saveGithubSettings,
 } from "@/lib/drafts";
+import { startExperiment, recordResult } from "@/lib/experiments";
 
 export async function saveFact(
   factId: string,
@@ -166,5 +167,47 @@ export async function saveGithubAction(input: {
     return { error: null };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to save" };
+  }
+}
+
+export async function startExperimentAction(input: {
+  draftId: string;
+  workspaceId: string;
+  hypothesis: string;
+  metricType: string;
+  baselineValue: number;
+  baselineNote?: string;
+}) {
+  try {
+    await startExperiment({
+      draftId: input.draftId,
+      hypothesis: input.hypothesis,
+      metricType: input.metricType,
+      baselineValue: input.baselineValue,
+      baselineNote: input.baselineNote,
+    });
+    revalidatePath("/dashboard/websites/" + input.workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to start" };
+  }
+}
+
+export async function recordResultAction(input: {
+  experimentId: string;
+  workspaceId: string;
+  resultValue: number;
+  resultNote?: string;
+}) {
+  try {
+    await recordResult({
+      experimentId: input.experimentId,
+      resultValue: input.resultValue,
+      resultNote: input.resultNote,
+    });
+    revalidatePath("/dashboard/websites/" + input.workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to record" };
   }
 }

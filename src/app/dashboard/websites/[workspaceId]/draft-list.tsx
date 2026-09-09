@@ -6,6 +6,7 @@ import {
   regenerateDraftAction,
   publishDraftAction,
 } from "./actions";
+import { ExperimentForm } from "./experiment-form";
 
 type Draft = {
   id: string;
@@ -200,15 +201,20 @@ export function DraftList({
               >
                 {pending ? "Publishing" : "Publish to GitHub"}
               </button>
-            ) : d.status === "PUBLISHED" && d.prUrl ? (
-              
-              <a
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-emerald-600 underline dark:text-emerald-400"
-              >
-                View pull request
-              </a>
+            ) : d.status === "PUBLISHED" ? (
+              <div className="space-y-2">
+                {d.prUrl ? (
+                  <a
+                    href={d.prUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block text-xs text-emerald-600 underline dark:text-emerald-400"
+                  >
+                    View pull request
+                  </a>
+                ) : null}
+                <ExperimentForm draftId={d.id} workspaceId={workspaceId} />
+              </div>
             ) : d.status === "REJECTED" ? (
               <button
                 onClick={() => regenerate(d.id)}

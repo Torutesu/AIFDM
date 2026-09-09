@@ -64,6 +64,7 @@ model Workspace {
   goals          Goal[]
   opportunities  Opportunity[]
   drafts         ContentDraft[]
+  experiments    Experiment[]
 
   @@index([organizationId])
 }
@@ -305,6 +306,32 @@ model ContentDraft {
   workspaceId   String
   workspace     Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  experiments   Experiment[]
+
   @@index([workspaceId, status])
   @@index([opportunityId])
+}
+
+model Experiment {
+  id             String    @id @default(uuid())
+  hypothesis     String
+  metricType     String
+  baselineValue  Float
+  baselineNote   String?
+  resultValue    Float?
+  resultNote     String?
+  status         String    @default("RUNNING")
+  startedAt      DateTime  @default(now())
+  measuredAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  draftId        String
+  draft          ContentDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  workspaceId    String
+  workspace      Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
+  @@index([draftId])
 }

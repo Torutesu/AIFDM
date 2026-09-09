@@ -5,6 +5,7 @@ import {
   listDecided,
   listDrafts,
 } from "@/lib/goals";
+import { listExperiments } from "@/lib/experiments";
 import { FactCard } from "./fact-card";
 import { GscPanel } from "./gsc-panel";
 import { GithubPanel } from "./github-panel";
@@ -12,6 +13,7 @@ import { GoalForm } from "./goal-form";
 import { OpportunityList } from "./opportunity-list";
 import { DecidedList } from "./decided-list";
 import { DraftList } from "./draft-list";
+import { ExperimentList } from "./experiment-list";
 import Link from "next/link";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -37,6 +39,7 @@ export default async function BrainPage({
   const opportunities = await listOpportunities(workspaceId);
   const decided = await listDecided(workspaceId);
   const drafts = await listDrafts(workspaceId);
+  const experiments = await listExperiments(workspaceId);
 
   const grouped = brain
     ? ORDER.map((category) => ({
@@ -86,6 +89,13 @@ export default async function BrainPage({
         <section className="space-y-3">
           <h2 className="text-sm font-medium">Drafts</h2>
           <DraftList items={drafts} workspaceId={workspaceId} />
+        </section>
+      ) : null}
+
+      {experiments.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium">Experiments</h2>
+          <ExperimentList items={experiments} workspaceId={workspaceId} />
         </section>
       ) : null}
 
