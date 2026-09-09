@@ -42,8 +42,68 @@ export const findOpportunities = inngest.createFunction(
         take: 50,
       });
 
-      return { goal, facts: brain.facts, pageUrls: pages.map((p) => p.url) };
+      const measured = await db.experiment.findMany({
+        where: { workspaceId: goal.workspaceId, status: "MEASURED" },
+        include: {
+          draft: {
+            select: {
+              format: true,
+              opportunity: { select: { type: true } },
+            },
+          },
+        },
+        orderBy: { measuredAt: "desc" },
+        take: 20,
+      });
+
+      const dismissed = await db.opportunity.findMany({
+        where: {
+          workspaceId: goal.workspaceId,
+          status: "DISMISSED",
+          dismissReason: { not: null },
+        },
+        select: { type: true, title: true, dismissReason: true },
+        take: 20,
+      });
+
+      return {
+        goal,
+        facts: brain.facts,
+        pageUrls: pages.map((p) => p.url),
+        measured,
+        dismissed,
+      };
     });
+
+    const learningLines: string[] = [];
+
+    for (const m of context.measured) {
+      const pct =
+        m.baselineValue === 0 || m.resultValue === null
+          ? null
+          : Math.round(
+              ((m.resultValue - m.baselineValue) / m.baselineValue) * 100
+            );
+      learningLines.push(
+        "WORKED (" +
+          (pct === null ? "unknown" : pct + "%") +
+          "): " +
+          m.draft.opportunity.type +
+          " as " +
+          m.draft.format +
+          " - " +
+          m.hypothesis
+      );
+    }
+
+    for (const d of context.dismissed) {
+      learningLines.push(
+        "REJECTED: " + d.type + " - " + d.title + " (" + d.dismissReason + ")"
+      );
+    }
+
+    const learnings =
+      learningLines.length > 0 ? learningLines.join("\n") : undefined;
 
     const result = await step.run("generate", async () => {
       return generateOpportunities({
@@ -60,6 +120,7 @@ export const findOpportunities = inngest.createFunction(
           confidence: f.confidence,
         })),
         pageUrls: context.pageUrls,
+        learnings,
         organizationId: context.goal.workspace.organizationId,
         workspaceId: context.goal.workspaceId,
       });

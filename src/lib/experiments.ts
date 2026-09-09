@@ -64,3 +64,31 @@ export async function recordResult(input: {
     },
   });
 }
+
+export async function getLearnings(workspaceId: string) {
+  const { organizationId } = await requireOrg();
+
+  const measured = await db.experiment.findMany({
+    where: {
+      workspaceId,
+      status: "MEASURED",
+      workspace: { organizationId },
+    },
+    include: { draft: { select: { format: true, opportunity: { select: { type: true } } } } },
+    orderBy: { measuredAt: "desc" },
+    take: 20,
+  });
+
+  const dismissed = await db.opportunity.findMany({
+    where: {
+      workspaceId,
+      status: "DISMISSED",
+      dismissReason: { not: null },
+      workspace: { organizationId },
+    },
+    select: { type: true, title: true, dismissReason: true },
+    take: 20,
+  });
+
+  return { measured, dismissed };
+}

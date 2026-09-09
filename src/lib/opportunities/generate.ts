@@ -16,12 +16,14 @@ export async function generateOpportunities({
   goal,
   facts,
   pageUrls,
+  learnings,
   organizationId,
   workspaceId,
 }: {
   goal: { description: string; metricType: string; targetValue: number; targetDate: Date };
   facts: { category: string; key: string; value: string; confidence: number }[];
   pageUrls: string[];
+  learnings?: string;
   organizationId?: string;
   workspaceId?: string;
 }): Promise<Opportunities> {
@@ -46,6 +48,11 @@ export async function generateOpportunities({
     factsText +
     "\n\nEXISTING PAGES ON THEIR SITE\n" +
     pageUrls.join("\n") +
+    (learnings
+      ? "\n\nWHAT WE HAVE LEARNED FROM PAST ACTIONS\n" +
+        learnings +
+        "\nWeight your suggestions accordingly. Do not repeat things that were rejected. Lean toward what worked."
+      : "") +
     "\n\nFind the highest-leverage marketing actions that move this specific goal. Consider what content is missing given their audience, where their positioning is unclear, and what distribution they are not using.";
 
   return generateStructured({
