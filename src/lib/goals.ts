@@ -62,3 +62,17 @@ export async function createGoal(input: {
 
   return goal;
 }
+
+export async function listDecided(workspaceId: string) {
+  const { organizationId } = await requireOrg();
+
+  return db.opportunity.findMany({
+    where: {
+      workspaceId,
+      status: { in: ["QUEUED", "DISMISSED"] },
+      workspace: { organizationId },
+    },
+    orderBy: { decidedAt: "desc" },
+    take: 20,
+  });
+}
