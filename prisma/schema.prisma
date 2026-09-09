@@ -60,6 +60,7 @@ model Workspace {
   metrics        Metric[]
   goals          Goal[]
   opportunities  Opportunity[]
+  drafts         ContentDraft[]
 
   @@index([organizationId])
 }
@@ -276,5 +277,28 @@ model Opportunity {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  drafts      ContentDraft[]
+
   @@index([workspaceId, status, priorityScore])
+}
+
+model ContentDraft {
+  id            String   @id @default(uuid())
+  format        String
+  title         String
+  body          String
+  status        String   @default("DRAFT")
+  score         Float?
+  scoreReasons  String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  workspaceId   String
+  workspace     Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
+  @@index([opportunityId])
 }
