@@ -6,9 +6,11 @@ import {
   listDrafts,
 } from "@/lib/goals";
 import { listExperiments } from "@/lib/experiments";
+import { getCosts } from "@/lib/costs";
 import { FactCard } from "./fact-card";
 import { GscPanel } from "./gsc-panel";
 import { GithubPanel } from "./github-panel";
+import { CostPanel } from "./cost-panel";
 import { GoalForm } from "./goal-form";
 import { OpportunityList } from "./opportunity-list";
 import { DecidedList } from "./decided-list";
@@ -40,6 +42,7 @@ export default async function BrainPage({
   const decided = await listDecided(workspaceId);
   const drafts = await listDrafts(workspaceId);
   const experiments = await listExperiments(workspaceId);
+  const costs = await getCosts(workspaceId);
 
   const grouped = brain
     ? ORDER.map((category) => ({
@@ -105,6 +108,8 @@ export default async function BrainPage({
           <DecidedList items={decided} />
         </section>
       ) : null}
+
+      <CostPanel costs={costs} />
 
       <GithubPanel
         workspaceId={workspaceId}
