@@ -10,7 +10,10 @@ export const generateContentDraft = inngest.createFunction(
     retries: 2,
   },
   async ({ event, step }) => {
-    const { opportunityId } = event.data as { opportunityId: string };
+    const { opportunityId, feedback } = event.data as {
+      opportunityId: string;
+      feedback?: string;
+    };
 
     const context = await step.run("load-context", async () => {
       const opportunity = await db.opportunity.findUnique({
@@ -45,6 +48,7 @@ export const generateContentDraft = inngest.createFunction(
           evidence: context.opportunity.evidence,
         },
         facts,
+        feedback,
         organizationId: context.opportunity.workspace.organizationId,
         workspaceId: context.opportunity.workspaceId,
       });

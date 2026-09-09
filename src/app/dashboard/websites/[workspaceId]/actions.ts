@@ -8,6 +8,7 @@ import { listSites } from "@/lib/integrations/google/gsc";
 import { inngest } from "@/inngest/client";
 import { revalidatePath } from "next/cache";
 import { decideOpportunity } from "@/lib/decisions";
+import { decideDraft, regenerateDraft } from "@/lib/drafts";
 
 export async function saveFact(
   factId: string,
@@ -100,6 +101,34 @@ export async function decide(
 ) {
   try {
     await decideOpportunity({ opportunityId, decision, reason, note });
+    revalidatePath("/dashboard/websites/" + workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong" };
+  }
+}
+
+export async function decideDraftAction(
+  draftId: string,
+  decision: "APPROVED" | "REJECTED",
+  workspaceId: string,
+  reason?: string
+) {
+  try {
+    await decideDraft({ draftId, decision, reason });
+    revalidatePath("/dashboard/websites/" + workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong" };
+  }
+}
+
+export async function regenerateDraftAction(
+  draftId: string,
+  workspaceId: string
+) {
+  try {
+    await regenerateDraft(draftId);
     revalidatePath("/dashboard/websites/" + workspaceId);
     return { error: null };
   } catch (err) {

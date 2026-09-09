@@ -290,6 +290,7 @@ model ContentDraft {
   status        String   @default("DRAFT")
   score         Float?
   scoreReasons  String[]
+    rejectReason  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

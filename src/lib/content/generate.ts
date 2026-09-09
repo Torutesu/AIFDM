@@ -18,6 +18,7 @@ Rules you must follow:
 export async function generateContent({
   opportunity,
   facts,
+  feedback,
   organizationId,
   workspaceId,
 }: {
@@ -28,6 +29,7 @@ export async function generateContent({
     evidence: string[];
   };
   facts: { category: string; key: string; value: string }[];
+  feedback?: string;
   organizationId?: string;
   workspaceId?: string;
 }): Promise<ContentDraft> {
@@ -50,6 +52,9 @@ export async function generateContent({
     opportunity.evidence.join("\n") +
     "\n\nWHAT WE KNOW ABOUT THIS COMPANY\n" +
     factsText +
+    (feedback
+      ? "\n\nA PREVIOUS ATTEMPT WAS REJECTED FOR THIS REASON\n" + feedback + "\nFix this."
+      : "") +
     "\n\nWrite the content this action calls for. Ground every claim in the facts above.";
 
   return generateStructured({

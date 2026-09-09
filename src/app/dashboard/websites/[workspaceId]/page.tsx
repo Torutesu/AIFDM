@@ -84,7 +84,7 @@ export default async function BrainPage({
       {drafts.length > 0 ? (
         <section className="space-y-3">
           <h2 className="text-sm font-medium">Drafts</h2>
-          <DraftList items={drafts} />
+          <DraftList items={drafts} workspaceId={workspaceId} />
         </section>
       ) : null}
 
