@@ -5,8 +5,16 @@ import { crawlWebsite } from "@/inngest/functions/crawl-website";
 import { buildBrain } from "@/inngest/functions/build-brain";
 import { syncGsc } from "@/inngest/functions/sync-gsc";
 import { findOpportunities } from "@/inngest/functions/find-opportunities";
+import { generateContentDraft } from "@/inngest/functions/generate-content";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [helloWorld, crawlWebsite, buildBrain, syncGsc, findOpportunities],
+  functions: [
+    helloWorld,
+    crawlWebsite,
+    buildBrain,
+    syncGsc,
+    findOpportunities,
+    generateContentDraft,
+  ],
 });

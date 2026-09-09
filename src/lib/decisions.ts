@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/tenancy";
+import { inngest } from "@/inngest/client";
 
 export async function decideOpportunity(input: {
   opportunityId: string;
@@ -19,7 +20,7 @@ export async function decideOpportunity(input: {
   if (!opportunity) throw new Error("Opportunity not found");
   if (opportunity.status !== "OPEN") throw new Error("Already decided");
 
-  return db.opportunity.update({
+  const updated = await db.opportunity.update({
     where: { id: input.opportunityId },
     data: {
       status: input.decision,
@@ -30,4 +31,13 @@ export async function decideOpportunity(input: {
       decisionNote: input.note ?? null,
     },
   });
+
+  if (input.decision === "QUEUED") {
+    await inngest.send({
+      name: "content/generate.requested",
+      data: { opportunityId: input.opportunityId },
+    });
+  }
+
+  return updated;
 }

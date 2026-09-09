@@ -76,3 +76,14 @@ export async function listDecided(workspaceId: string) {
     take: 20,
   });
 }
+
+export async function listDrafts(workspaceId: string) {
+  const { organizationId } = await requireOrg();
+
+  return db.contentDraft.findMany({
+    where: { workspaceId, workspace: { organizationId } },
+    orderBy: { createdAt: "desc" },
+    include: { opportunity: { select: { title: true } } },
+    take: 20,
+  });
+}

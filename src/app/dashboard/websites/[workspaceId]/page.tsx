@@ -1,10 +1,16 @@
 import { getActiveBrain, getIntegration } from "@/lib/brain/queries";
-import { getActiveGoal, listOpportunities, listDecided } from "@/lib/goals";
+import {
+  getActiveGoal,
+  listOpportunities,
+  listDecided,
+  listDrafts,
+} from "@/lib/goals";
 import { FactCard } from "./fact-card";
 import { GscPanel } from "./gsc-panel";
 import { GoalForm } from "./goal-form";
 import { OpportunityList } from "./opportunity-list";
 import { DecidedList } from "./decided-list";
+import { DraftList } from "./draft-list";
 import Link from "next/link";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -29,6 +35,7 @@ export default async function BrainPage({
   const goal = await getActiveGoal(workspaceId);
   const opportunities = await listOpportunities(workspaceId);
   const decided = await listDecided(workspaceId);
+  const drafts = await listDrafts(workspaceId);
 
   const grouped = brain
     ? ORDER.map((category) => ({
@@ -73,6 +80,13 @@ export default async function BrainPage({
         <h2 className="text-sm font-medium">Opportunities</h2>
         <OpportunityList items={opportunities} workspaceId={workspaceId} />
       </section>
+
+      {drafts.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium">Drafts</h2>
+          <DraftList items={drafts} />
+        </section>
+      ) : null}
 
       {decided.length > 0 ? (
         <section className="space-y-3">
