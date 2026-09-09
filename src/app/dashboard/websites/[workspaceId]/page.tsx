@@ -73,7 +73,7 @@ export default async function BrainPage({
         <OpportunityList items={opportunities} />
       </section>
 
-      {/* <GscPanel workspaceId={workspaceId} integration={integration} /> */}
+      <GscPanel workspaceId={workspaceId} integration={integration} />
 
       {grouped.map((group) => (
         <section key={group.category} className="space-y-2">
