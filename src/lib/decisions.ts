@@ -4,6 +4,7 @@ import { requireOrg } from "@/lib/tenancy";
 export async function decideOpportunity(input: {
   opportunityId: string;
   decision: "QUEUED" | "DISMISSED";
+  reason?: string;
   note?: string;
 }) {
   const { organizationId, userId } = await requireOrg();
@@ -24,6 +25,8 @@ export async function decideOpportunity(input: {
       status: input.decision,
       decidedAt: new Date(),
       decidedBy: userId,
+      dismissReason:
+        input.decision === "DISMISSED" ? input.reason ?? null : null,
       decisionNote: input.note ?? null,
     },
   });

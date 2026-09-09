@@ -21,6 +21,13 @@ const IMPACT_COLOR: Record<string, string> = {
   low: "text-neutral-500",
 };
 
+const REASONS = [
+  "Not relevant to us",
+  "Already doing this",
+  "Too expensive",
+  "Wrong timing",
+];
+
 export function OpportunityList({
   items,
   workspaceId,
@@ -30,13 +37,40 @@ export function OpportunityList({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [dismissingId, setDismissingId] = useState<string | null>(null);
+  const [reason, setReason] = useState<string | null>(null);
+  const [note, setNote] = useState("");
 
-    function handleDecide(id: string, decision: "QUEUED" | "DISMISSED") {
+  function approve(id: string) {
     setError(null);
     startTransition(async () => {
-      const result = await decide(id, decision, workspaceId);
+      const result = await decide(id, "QUEUED", workspaceId);
       if (result.error) setError(result.error);
     });
+  }
+
+  function confirmDismiss(id: string) {
+    if (!reason) {
+      setError("Pick a reason first");
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await decide(id, "DISMISSED", workspaceId, reason, note);
+      if (result.error) setError(result.error);
+      else {
+        setDismissingId(null);
+        setReason(null);
+        setNote("");
+      }
+    });
+  }
+
+  function cancelDismiss() {
+    setDismissingId(null);
+    setReason(null);
+    setNote("");
+    setError(null);
   }
 
   if (items.length === 0) {
@@ -118,22 +152,71 @@ export function OpportunityList({
             </span>
           </div>
 
-          <div className="flex gap-2 pt-1">
-            <button
-                           onClick={() => handleDecide(o.id, "QUEUED")}
-              disabled={pending}
-              className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
-            >
-              Approve
-            </button>
-            <button
-              onClick={() => handleDecide(o.id, "DISMISSED")}
-              disabled={pending}
-              className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs disabled:opacity-50 dark:border-neutral-700"
-            >
-              Dismiss
-            </button>
-          </div>
+          {dismissingId === o.id ? (
+            <div className="space-y-2 rounded-md border border-neutral-200 p-3 dark:border-neutral-800">
+              <p className="text-xs font-medium">Why are you dismissing this?</p>
+
+              <div className="flex flex-wrap gap-2">
+                {REASONS.map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setReason(r)}
+                    className={
+                      reason === r
+                        ? "rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white dark:bg-white dark:text-neutral-900"
+                        : "rounded-md border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700"
+                    }
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Anything else? (optional)"
+                className="w-full rounded border border-neutral-300 px-3 py-2 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+              />
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => confirmDismiss(o.id)}
+                  disabled={pending}
+                  className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
+                >
+                  {pending ? "Saving…" : "Confirm dismiss"}
+                </button>
+                <button
+                  onClick={cancelDismiss}
+                  disabled={pending}
+                  className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs disabled:opacity-50 dark:border-neutral-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => approve(o.id)}
+                disabled={pending}
+                className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => {
+                  setError(null);
+                  setDismissingId(o.id);
+                }}
+                disabled={pending}
+                className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs disabled:opacity-50 dark:border-neutral-700"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>

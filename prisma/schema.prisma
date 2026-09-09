@@ -269,6 +269,7 @@ model Opportunity {
   decidedAt       DateTime?
   decidedBy       String?
   decisionNote    String?
+  dismissReason   String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

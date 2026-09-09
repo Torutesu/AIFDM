@@ -93,11 +93,13 @@ export async function addGoal(input: {
 
 export async function decide(
   opportunityId: string,
-    decision: "QUEUED" | "DISMISSED",
-  workspaceId: string
+  decision: "QUEUED" | "DISMISSED",
+  workspaceId: string,
+  reason?: string,
+  note?: string
 ) {
   try {
-    await decideOpportunity({ opportunityId, decision });
+    await decideOpportunity({ opportunityId, decision, reason, note });
     revalidatePath("/dashboard/websites/" + workspaceId);
     return { error: null };
   } catch (err) {
