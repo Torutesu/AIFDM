@@ -6,7 +6,13 @@ export async function getActiveBrain(workspaceId: string) {
 
   const workspace = await db.workspace.findFirst({
     where: { id: workspaceId, organizationId },
-    select: { id: true, name: true },
+    select: {
+      id: true,
+      name: true,
+      githubOwner: true,
+      githubRepo: true,
+      githubPath: true,
+    },
   });
   if (!workspace) throw new Error("Workspace not found");
 

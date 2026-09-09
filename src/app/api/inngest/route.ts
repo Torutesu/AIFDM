@@ -6,6 +6,7 @@ import { buildBrain } from "@/inngest/functions/build-brain";
 import { syncGsc } from "@/inngest/functions/sync-gsc";
 import { findOpportunities } from "@/inngest/functions/find-opportunities";
 import { generateContentDraft } from "@/inngest/functions/generate-content";
+import { publishDraft } from "@/inngest/functions/publish-draft";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -16,5 +17,6 @@ export const { GET, POST, PUT } = serve({
     syncGsc,
     findOpportunities,
     generateContentDraft,
+    publishDraft,
   ],
 });

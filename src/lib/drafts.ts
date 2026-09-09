@@ -51,3 +51,44 @@ export async function regenerateDraft(draftId: string) {
 
   return draft;
 }
+
+export async function publishDraftById(draftId: string) {
+  const { organizationId } = await requireOrg();
+
+  const draft = await db.contentDraft.findFirst({
+    where: { id: draftId, workspace: { organizationId } },
+  });
+
+  if (!draft) throw new Error("Draft not found");
+  if (draft.status !== "APPROVED") throw new Error("Approve it first");
+
+  await inngest.send({
+    name: "draft/publish.requested",
+    data: { draftId },
+  });
+
+  return draft;
+}
+
+export async function saveGithubSettings(input: {
+  workspaceId: string;
+  owner: string;
+  repo: string;
+  path: string;
+}) {
+  const { organizationId } = await requireOrg();
+
+  const workspace = await db.workspace.findFirst({
+    where: { id: input.workspaceId, organizationId },
+  });
+  if (!workspace) throw new Error("Workspace not found");
+
+  return db.workspace.update({
+    where: { id: input.workspaceId },
+    data: {
+      githubOwner: input.owner.trim(),
+      githubRepo: input.repo.trim(),
+      githubPath: input.path.trim() || "content",
+    },
+  });
+}

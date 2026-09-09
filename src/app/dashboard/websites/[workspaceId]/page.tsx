@@ -7,6 +7,7 @@ import {
 } from "@/lib/goals";
 import { FactCard } from "./fact-card";
 import { GscPanel } from "./gsc-panel";
+import { GithubPanel } from "./github-panel";
 import { GoalForm } from "./goal-form";
 import { OpportunityList } from "./opportunity-list";
 import { DecidedList } from "./decided-list";
@@ -94,6 +95,13 @@ export default async function BrainPage({
           <DecidedList items={decided} />
         </section>
       ) : null}
+
+      <GithubPanel
+        workspaceId={workspaceId}
+        owner={workspace.githubOwner}
+        repo={workspace.githubRepo}
+        path={workspace.githubPath}
+      />
 
       <GscPanel workspaceId={workspaceId} integration={integration} />
 

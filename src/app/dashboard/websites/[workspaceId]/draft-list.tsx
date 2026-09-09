@@ -1,7 +1,11 @@
 "use client";
 
 import { useTransition, useState } from "react";
-import { decideDraftAction, regenerateDraftAction } from "./actions";
+import {
+  decideDraftAction,
+  regenerateDraftAction,
+  publishDraftAction,
+} from "./actions";
 
 type Draft = {
   id: string;
@@ -12,6 +16,7 @@ type Draft = {
   score: number | null;
   scoreReasons: string[];
   rejectReason: string | null;
+  prUrl: string | null;
   opportunity: { title: string };
 };
 
@@ -68,6 +73,14 @@ export function DraftList({
     });
   }
 
+  function publish(id: string) {
+    setError(null);
+    startTransition(async () => {
+      const r = await publishDraftAction(id, workspaceId);
+      if (r.error) setError(r.error);
+    });
+  }
+
   return (
     <div className="space-y-3">
       {error ? <p className="text-sm text-red-500">{error}</p> : null}
@@ -98,9 +111,7 @@ export function DraftList({
             </p>
 
             {d.rejectReason ? (
-              <p className="text-xs text-red-500">
-                Rejected: {d.rejectReason}
-              </p>
+              <p className="text-xs text-red-500">Rejected: {d.rejectReason}</p>
             ) : null}
 
             {d.scoreReasons.length > 0 ? (
@@ -149,7 +160,7 @@ export function DraftList({
                       disabled={pending}
                       className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
                     >
-                      {pending ? "Saving…" : "Confirm reject"}
+                      {pending ? "Saving" : "Confirm reject"}
                     </button>
                     <button
                       onClick={() => {
@@ -181,13 +192,30 @@ export function DraftList({
                   </button>
                 </div>
               )
+            ) : d.status === "APPROVED" ? (
+              <button
+                onClick={() => publish(d.id)}
+                disabled={pending}
+                className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
+              >
+                {pending ? "Publishing" : "Publish to GitHub"}
+              </button>
+            ) : d.status === "PUBLISHED" && d.prUrl ? (
+              
+              <a
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-emerald-600 underline dark:text-emerald-400"
+              >
+                View pull request
+              </a>
             ) : d.status === "REJECTED" ? (
               <button
                 onClick={() => regenerate(d.id)}
                 disabled={pending}
                 className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs disabled:opacity-50 dark:border-neutral-700"
               >
-                {pending ? "Regenerating…" : "Regenerate"}
+                {pending ? "Regenerating" : "Regenerate"}
               </button>
             ) : null}
           </div>

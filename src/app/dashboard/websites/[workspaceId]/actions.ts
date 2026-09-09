@@ -8,7 +8,12 @@ import { listSites } from "@/lib/integrations/google/gsc";
 import { inngest } from "@/inngest/client";
 import { revalidatePath } from "next/cache";
 import { decideOpportunity } from "@/lib/decisions";
-import { decideDraft, regenerateDraft } from "@/lib/drafts";
+import {
+  decideDraft,
+  regenerateDraft,
+  publishDraftById,
+  saveGithubSettings,
+} from "@/lib/drafts";
 
 export async function saveFact(
   factId: string,
@@ -133,5 +138,33 @@ export async function regenerateDraftAction(
     return { error: null };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Something went wrong" };
+  }
+}
+
+export async function publishDraftAction(
+  draftId: string,
+  workspaceId: string
+) {
+  try {
+    await publishDraftById(draftId);
+    revalidatePath("/dashboard/websites/" + workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong" };
+  }
+}
+
+export async function saveGithubAction(input: {
+  workspaceId: string;
+  owner: string;
+  repo: string;
+  path: string;
+}) {
+  try {
+    await saveGithubSettings(input);
+    revalidatePath("/dashboard/websites/" + input.workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to save" };
   }
 }
