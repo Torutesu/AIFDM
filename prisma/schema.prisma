@@ -58,6 +58,8 @@ model Workspace {
     brains         Brain[]
       integrations   Integration[]
   metrics        Metric[]
+    goals          Goal[]
+  opportunities  Opportunity[]
 
   @@index([organizationId])
 }
@@ -233,4 +235,40 @@ enum IntegrationStatus {
   EXPIRED
   REVOKED
   ERROR
+}
+model Goal {
+  id          String   @id @default(uuid())
+  description String
+  metricType  String
+  targetValue Int
+  targetDate  DateTime
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
+}
+
+model Opportunity {
+  id              String   @id @default(uuid())
+  type            String
+  title           String
+  reasoning       String
+  evidence        String[]
+  expectedImpact  String
+  confidence      Float
+  effort          String
+  priorityScore   Float
+  status          String   @default("OPEN")
+  risks           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status, priorityScore])
 }

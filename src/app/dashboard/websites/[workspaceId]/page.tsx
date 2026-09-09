@@ -1,6 +1,9 @@
 import { getActiveBrain, getIntegration } from "@/lib/brain/queries";
+import { getActiveGoal, listOpportunities } from "@/lib/goals";
 import { FactCard } from "./fact-card";
 import { GscPanel } from "./gsc-panel";
+import { GoalForm } from "./goal-form";
+import { OpportunityList } from "./opportunity-list";
 import Link from "next/link";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -22,6 +25,9 @@ export default async function BrainPage({
   const { workspaceId } = await params;
   const { workspace, brain } = await getActiveBrain(workspaceId);
   const integration = await getIntegration(workspaceId);
+  const goal = await getActiveGoal(workspaceId);
+  const opportunities = await listOpportunities(workspaceId);
+   
 
   const grouped = brain
     ? ORDER.map((category) => ({
@@ -46,20 +52,28 @@ export default async function BrainPage({
             </span>
           ) : null}
         </div>
-        <p className="text-sm text-neutral-500">
-          Click any fact to correct it. Corrections are locked and survive future
-          rebuilds.
-        </p>
       </div>
 
-      <GscPanel workspaceId={workspaceId} integration={integration} />
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium">Goal</h2>
+        {goal ? (
+          <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
+            <p className="text-sm font-medium">{goal.description}</p>
+            <p className="mt-1 text-xs text-neutral-500">
+              {goal.targetValue} {goal.metricType} by{" "}
+              {new Date(goal.targetDate).toLocaleDateString()}
+            </p>
+          </div>
+        ) : null}
+        <GoalForm workspaceId={workspaceId} />
+      </section>
 
-      {!brain ? (
-        <p className="text-sm text-neutral-500">
-          No knowledge base yet. It builds automatically after the crawl
-          finishes.
-        </p>
-      ) : null}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium">Opportunities</h2>
+        <OpportunityList items={opportunities} />
+      </section>
+
+      {/* <GscPanel workspaceId={workspaceId} integration={integration} /> */}
 
       {grouped.map((group) => (
         <section key={group.category} className="space-y-2">

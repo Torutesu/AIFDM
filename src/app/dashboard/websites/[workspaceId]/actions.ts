@@ -1,6 +1,7 @@
 "use server";
 
 import { updateFact } from "@/lib/brain/queries";
+import { createGoal } from "@/lib/goals";
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/tenancy";
 import { listSites } from "@/lib/integrations/google/gsc";
@@ -70,5 +71,21 @@ export async function syncNow(integrationId: string) {
     return { error: null };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed" };
+  }
+}
+
+export async function addGoal(input: {
+  workspaceId: string;
+  description: string;
+  metricType: string;
+  targetValue: number;
+  days: number;
+}) {
+  try {
+    await createGoal(input);
+    revalidatePath("/dashboard/websites/" + input.workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to set goal" };
   }
 }
