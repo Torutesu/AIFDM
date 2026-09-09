@@ -93,7 +93,7 @@ export async function addGoal(input: {
 
 export async function decide(
   opportunityId: string,
-  decision: "APPROVED" | "DISMISSED",
+    decision: "QUEUED" | "DISMISSED",
   workspaceId: string
 ) {
   try {

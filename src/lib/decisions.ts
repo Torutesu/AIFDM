@@ -3,7 +3,7 @@ import { requireOrg } from "@/lib/tenancy";
 
 export async function decideOpportunity(input: {
   opportunityId: string;
-  decision: "APPROVED" | "DISMISSED";
+  decision: "QUEUED" | "DISMISSED";
   note?: string;
 }) {
   const { organizationId, userId } = await requireOrg();

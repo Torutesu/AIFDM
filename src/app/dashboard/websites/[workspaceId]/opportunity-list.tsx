@@ -31,7 +31,7 @@ export function OpportunityList({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function handleDecide(id: string, decision: "APPROVED" | "DISMISSED") {
+    function handleDecide(id: string, decision: "QUEUED" | "DISMISSED") {
     setError(null);
     startTransition(async () => {
       const result = await decide(id, decision, workspaceId);
@@ -120,7 +120,7 @@ export function OpportunityList({
 
           <div className="flex gap-2 pt-1">
             <button
-              onClick={() => handleDecide(o.id, "APPROVED")}
+                           onClick={() => handleDecide(o.id, "QUEUED")}
               disabled={pending}
               className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
             >
