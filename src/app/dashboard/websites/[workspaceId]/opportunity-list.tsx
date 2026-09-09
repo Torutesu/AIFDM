@@ -1,3 +1,8 @@
+"use client";
+
+import { useTransition, useState } from "react";
+import { decide } from "./actions";
+
 type Opportunity = {
   id: string;
   type: string;
@@ -16,7 +21,24 @@ const IMPACT_COLOR: Record<string, string> = {
   low: "text-neutral-500",
 };
 
-export function OpportunityList({ items }: { items: Opportunity[] }) {
+export function OpportunityList({
+  items,
+  workspaceId,
+}: {
+  items: Opportunity[];
+  workspaceId: string;
+}) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function handleDecide(id: string, decision: "APPROVED" | "DISMISSED") {
+    setError(null);
+    startTransition(async () => {
+      const result = await decide(id, decision, workspaceId);
+      if (result.error) setError(result.error);
+    });
+  }
+
   if (items.length === 0) {
     return (
       <p className="text-sm text-neutral-500">
@@ -27,6 +49,8 @@ export function OpportunityList({ items }: { items: Opportunity[] }) {
 
   return (
     <div className="space-y-3">
+      {error ? <p className="text-sm text-red-500">{error}</p> : null}
+
       {items.map((o) => (
         <div
           key={o.id}
@@ -92,6 +116,23 @@ export function OpportunityList({ items }: { items: Opportunity[] }) {
               <span className="text-neutral-400">Confidence </span>
               {Math.round(o.confidence * 100)}%
             </span>
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => handleDecide(o.id, "APPROVED")}
+              disabled={pending}
+              className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white disabled:opacity-50 dark:bg-white dark:text-neutral-900"
+            >
+              Approve
+            </button>
+            <button
+              onClick={() => handleDecide(o.id, "DISMISSED")}
+              disabled={pending}
+              className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs disabled:opacity-50 dark:border-neutral-700"
+            >
+              Dismiss
+            </button>
           </div>
         </div>
       ))}

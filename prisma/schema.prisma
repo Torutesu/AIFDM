@@ -55,10 +55,10 @@ model Workspace {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   websites       Website[]
-    brains         Brain[]
-      integrations   Integration[]
+  brains         Brain[]
+  integrations   Integration[]
   metrics        Metric[]
-    goals          Goal[]
+  goals          Goal[]
   opportunities  Opportunity[]
 
   @@index([organizationId])
@@ -72,19 +72,19 @@ enum Role {
 }
 
 model Website {
-  id           String        @id @default(uuid())
-  url          String
-  crawlStatus  CrawlStatus   @default(PENDING)
-  pageCount    Int           @default(0)
+  id            String        @id @default(uuid())
+  url           String
+  crawlStatus   CrawlStatus   @default(PENDING)
+  pageCount     Int           @default(0)
   lastCrawledAt DateTime?
-  error        String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  error         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  workspaceId  String
-  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId   String
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  pages        CrawledPage[]
+  pages         CrawledPage[]
 
   @@index([workspaceId])
 }
@@ -181,6 +181,7 @@ enum SourceType {
   USER
   INFERENCE
 }
+
 model Integration {
   id                String            @id @default(uuid())
   provider          String
@@ -201,11 +202,11 @@ model Integration {
 }
 
 model Credential {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   encryptedPayload String
   expiresAt        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   integrationId String      @unique
   integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
@@ -236,6 +237,7 @@ enum IntegrationStatus {
   REVOKED
   ERROR
 }
+
 model Goal {
   id          String   @id @default(uuid())
   description String
@@ -253,7 +255,7 @@ model Goal {
 }
 
 model Opportunity {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   type            String
   title           String
   reasoning       String
@@ -262,10 +264,13 @@ model Opportunity {
   confidence      Float
   effort          String
   priorityScore   Float
-  status          String   @default("OPEN")
+  status          String    @default("OPEN")
   risks           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  decidedAt       DateTime?
+  decidedBy       String?
+  decisionNote    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

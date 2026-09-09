@@ -70,7 +70,7 @@ export default async function BrainPage({
 
       <section className="space-y-3">
         <h2 className="text-sm font-medium">Opportunities</h2>
-        <OpportunityList items={opportunities} />
+        <OpportunityList items={opportunities} workspaceId={workspaceId} />
       </section>
 
       <GscPanel workspaceId={workspaceId} integration={integration} />

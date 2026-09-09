@@ -7,6 +7,7 @@ import { requireOrg } from "@/lib/tenancy";
 import { listSites } from "@/lib/integrations/google/gsc";
 import { inngest } from "@/inngest/client";
 import { revalidatePath } from "next/cache";
+import { decideOpportunity } from "@/lib/decisions";
 
 export async function saveFact(
   factId: string,
@@ -87,5 +88,19 @@ export async function addGoal(input: {
     return { error: null };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to set goal" };
+  }
+}
+
+export async function decide(
+  opportunityId: string,
+  decision: "APPROVED" | "DISMISSED",
+  workspaceId: string
+) {
+  try {
+    await decideOpportunity({ opportunityId, decision });
+    revalidatePath("/dashboard/websites/" + workspaceId);
+    return { error: null };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Something went wrong" };
   }
 }
