@@ -96,7 +96,7 @@ Set every variable from `.env.example` in the host's environment. Clerk's keys
 and `DATABASE_URL` are read during the build, not only at runtime, so a missing
 value fails the build rather than the first request.
 
-Leave `GOOGLE_REDIRECT_URI` for the next step — you need the real domain first.
+`GOOGLE_REDIRECT_URI` is optional — see step 4. Everything else is required.
 
 ### 3. Apply migrations
 
@@ -113,17 +113,20 @@ If you would rather have migrations run on every deploy, change the Vercel build
 command to `prisma migrate deploy && pnpm build` — but note preview deployments
 would then migrate the production database too.
 
-### 4. Point Google OAuth at the deployed domain
+### 4. Register the Google OAuth redirect URI
 
 In Google Cloud → Credentials → your OAuth client, add the authorised redirect
-URI:
+URI for whatever host the app ended up on — the Vercel-assigned one is fine:
 
 ```
-https://<your-domain>/api/integrations/google/callback
+https://<your-host>/api/integrations/google/callback
 ```
 
-Then set `GOOGLE_REDIRECT_URI` to that exact string and redeploy. It must match
-character for character or Google rejects the callback.
+You do **not** need to set `GOOGLE_REDIRECT_URI`. Left unset, the app derives
+the redirect URI from the host each request arrives on, so it keeps working
+when you add a custom domain later — register the new host's URI alongside the
+old one and nothing else changes. Set the variable only if you want to pin one
+specific URI.
 
 While the OAuth consent screen is in *Testing*, only the accounts listed as test
 users can connect Search Console. Publish the consent screen before onboarding

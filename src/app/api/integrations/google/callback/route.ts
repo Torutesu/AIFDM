@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/tenancy";
 import { encrypt } from "@/lib/crypto/envelope";
+import { googleRedirectUri } from "@/lib/integrations/google/redirect-uri";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
       code,
       client_id: process.env.GOOGLE_CLIENT_ID!,
       client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
+      redirect_uri: googleRedirectUri(req),
       grant_type: "authorization_code",
     }),
   });

@@ -1,4 +1,5 @@
 import { requireOrg } from "@/lib/tenancy";
+import { googleRedirectUri } from "@/lib/integrations/google/redirect-uri";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
+    redirect_uri: googleRedirectUri(req),
     response_type: "code",
     access_type: "offline",
     prompt: "consent",
