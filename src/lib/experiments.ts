@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/tenancy";
+import { recordEvent } from "@/lib/events";
 
 export async function listExperiments(workspaceId: string) {
   const { organizationId } = await requireOrg();
@@ -19,7 +20,7 @@ export async function startExperiment(input: {
   baselineValue: number;
   baselineNote?: string;
 }) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const draft = await db.contentDraft.findFirst({
     where: { id: input.draftId, workspace: { organizationId } },
@@ -29,7 +30,7 @@ export async function startExperiment(input: {
 
   if (!input.hypothesis.trim()) throw new Error("Write a hypothesis");
 
-  return db.experiment.create({
+  const experiment = await db.experiment.create({
     data: {
       draftId: input.draftId,
       workspaceId: draft.workspaceId,
@@ -39,6 +40,17 @@ export async function startExperiment(input: {
       baselineNote: input.baselineNote?.trim() || null,
     },
   });
+
+  await recordEvent({
+    workspaceId: draft.workspaceId,
+    action: "experiment.started",
+    targetType: "experiment",
+    targetId: experiment.id,
+    summary: experiment.hypothesis,
+    actorId: userId,
+  });
+
+  return experiment;
 }
 
 export async function recordResult(input: {
@@ -46,7 +58,7 @@ export async function recordResult(input: {
   resultValue: number;
   resultNote?: string;
 }) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const experiment = await db.experiment.findFirst({
     where: { id: input.experimentId, workspace: { organizationId } },
@@ -54,7 +66,7 @@ export async function recordResult(input: {
   if (!experiment) throw new Error("Experiment not found");
   if (experiment.status !== "RUNNING") throw new Error("Already measured");
 
-  return db.experiment.update({
+  const updated = await db.experiment.update({
     where: { id: input.experimentId },
     data: {
       resultValue: input.resultValue,
@@ -63,6 +75,17 @@ export async function recordResult(input: {
       measuredAt: new Date(),
     },
   });
+
+  await recordEvent({
+    workspaceId: experiment.workspaceId,
+    action: "experiment.measured",
+    targetType: "experiment",
+    targetId: input.experimentId,
+    summary: experiment.hypothesis,
+    actorId: userId,
+  });
+
+  return updated;
 }
 
 export async function getLearnings(workspaceId: string) {
@@ -74,7 +97,11 @@ export async function getLearnings(workspaceId: string) {
       status: "MEASURED",
       workspace: { organizationId },
     },
-    include: { draft: { select: { format: true, opportunity: { select: { type: true } } } } },
+    include: {
+      draft: {
+        select: { format: true, opportunity: { select: { type: true } } },
+      },
+    },
     orderBy: { measuredAt: "desc" },
     take: 20,
   });

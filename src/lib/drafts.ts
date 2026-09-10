@@ -1,13 +1,14 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/tenancy";
 import { inngest } from "@/inngest/client";
+import { recordEvent } from "@/lib/events";
 
 export async function decideDraft(input: {
   draftId: string;
   decision: "APPROVED" | "REJECTED";
   reason?: string;
 }) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const draft = await db.contentDraft.findFirst({
     where: {
@@ -19,7 +20,7 @@ export async function decideDraft(input: {
   if (!draft) throw new Error("Draft not found");
   if (draft.status !== "DRAFT") throw new Error("Already decided");
 
-  return db.contentDraft.update({
+  const updated = await db.contentDraft.update({
     where: { id: input.draftId },
     data: {
       status: input.decision,
@@ -27,10 +28,22 @@ export async function decideDraft(input: {
         input.decision === "REJECTED" ? input.reason ?? null : null,
     },
   });
+
+  await recordEvent({
+    workspaceId: draft.workspaceId,
+    action:
+      input.decision === "APPROVED" ? "draft.approved" : "draft.rejected",
+    targetType: "draft",
+    targetId: input.draftId,
+    summary: draft.title,
+    actorId: userId,
+  });
+
+  return updated;
 }
 
 export async function regenerateDraft(draftId: string) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const draft = await db.contentDraft.findFirst({
     where: {
@@ -49,11 +62,20 @@ export async function regenerateDraft(draftId: string) {
     },
   });
 
+  await recordEvent({
+    workspaceId: draft.workspaceId,
+    action: "draft.regenerated",
+    targetType: "draft",
+    targetId: draftId,
+    summary: draft.title,
+    actorId: userId,
+  });
+
   return draft;
 }
 
 export async function publishDraftById(draftId: string) {
-  const { organizationId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg();
 
   const draft = await db.contentDraft.findFirst({
     where: { id: draftId, workspace: { organizationId } },
@@ -65,6 +87,15 @@ export async function publishDraftById(draftId: string) {
   await inngest.send({
     name: "draft/publish.requested",
     data: { draftId },
+  });
+
+  await recordEvent({
+    workspaceId: draft.workspaceId,
+    action: "draft.publish_requested",
+    targetType: "draft",
+    targetId: draftId,
+    summary: draft.title,
+    actorId: userId,
   });
 
   return draft;

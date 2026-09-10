@@ -65,6 +65,7 @@ model Workspace {
   opportunities  Opportunity[]
   drafts         ContentDraft[]
   experiments    Experiment[]
+    events         Event[]
 
   @@index([organizationId])
 }
@@ -334,4 +335,19 @@ model Experiment {
 
   @@index([workspaceId, status])
   @@index([draftId])
+}
+
+model Event {
+  id           String   @id @default(uuid())
+  action       String
+  targetType   String
+  targetId     String?
+  summary      String
+  actorId      String?
+  createdAt    DateTime @default(now())
+
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
 }

@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { requireOrg } from "@/lib/tenancy";
 import { inngest } from "@/inngest/client";
+import { recordEvent } from "@/lib/events";
 
 export async function decideOpportunity(input: {
   opportunityId: string;
@@ -30,6 +31,18 @@ export async function decideOpportunity(input: {
         input.decision === "DISMISSED" ? input.reason ?? null : null,
       decisionNote: input.note ?? null,
     },
+  });
+
+  await recordEvent({
+    workspaceId: opportunity.workspaceId,
+    action:
+      input.decision === "QUEUED"
+        ? "opportunity.approved"
+        : "opportunity.dismissed",
+    targetType: "opportunity",
+    targetId: input.opportunityId,
+    summary: opportunity.title,
+    actorId: userId,
   });
 
   if (input.decision === "QUEUED") {
