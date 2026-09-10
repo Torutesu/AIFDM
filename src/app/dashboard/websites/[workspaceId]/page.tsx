@@ -8,6 +8,7 @@ import {
 import { listExperiments } from "@/lib/experiments";
 import { getCosts } from "@/lib/costs";
 import { listEvents, getDigest } from "@/lib/events";
+import { requireOrg, hasRole } from "@/lib/tenancy";
 import { FactCard } from "./fact-card";
 import { GscPanel } from "./gsc-panel";
 import { GithubPanel } from "./github-panel";
@@ -38,6 +39,9 @@ export default async function BrainPage({
   params: Promise<{ workspaceId: string }>;
 }) {
   const { workspaceId } = await params;
+  const { role } = await requireOrg();
+  const canAct = hasRole(role, "MEMBER");
+  const canConfigure = hasRole(role, "ADMIN");
   const { workspace, brain } = await getActiveBrain(workspaceId);
   const integration = await getIntegration(workspaceId);
   const goal = await getActiveGoal(workspaceId);
@@ -76,6 +80,13 @@ export default async function BrainPage({
 
       <DigestPanel digest={digest} />
 
+      {canAct ? null : (
+        <p className="rounded-lg border border-neutral-200 p-3 text-xs text-neutral-500 dark:border-neutral-800">
+          Your role is read-only. You can see everything here, but approving,
+          publishing and editing are turned off.
+        </p>
+      )}
+
       <section className="space-y-3">
         <h2 className="text-sm font-medium">Goal</h2>
         {goal ? (
@@ -87,25 +98,33 @@ export default async function BrainPage({
             </p>
           </div>
         ) : null}
-        <GoalForm workspaceId={workspaceId} />
+        {canAct ? <GoalForm workspaceId={workspaceId} /> : null}
       </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-medium">Opportunities</h2>
-        <OpportunityList items={opportunities} workspaceId={workspaceId} />
+        <OpportunityList
+          items={opportunities}
+          workspaceId={workspaceId}
+          canAct={canAct}
+        />
       </section>
 
       {drafts.length > 0 ? (
         <section className="space-y-3">
           <h2 className="text-sm font-medium">Drafts</h2>
-          <DraftList items={drafts} workspaceId={workspaceId} />
+          <DraftList items={drafts} workspaceId={workspaceId} canAct={canAct} />
         </section>
       ) : null}
 
       {experiments.length > 0 ? (
         <section className="space-y-3">
           <h2 className="text-sm font-medium">Experiments</h2>
-          <ExperimentList items={experiments} workspaceId={workspaceId} />
+          <ExperimentList
+            items={experiments}
+            workspaceId={workspaceId}
+            canAct={canAct}
+          />
         </section>
       ) : null}
 
@@ -125,9 +144,15 @@ export default async function BrainPage({
         owner={workspace.githubOwner}
         repo={workspace.githubRepo}
         path={workspace.githubPath}
+        canConfigure={canConfigure}
       />
 
-      <GscPanel workspaceId={workspaceId} integration={integration} />
+      <GscPanel
+        workspaceId={workspaceId}
+        integration={integration}
+        canAct={canAct}
+        canConfigure={canConfigure}
+      />
 
       {grouped.map((group) => (
         <section key={group.category} className="space-y-2">
@@ -136,7 +161,7 @@ export default async function BrainPage({
           </h2>
           <div className="space-y-2">
             {group.facts.map((fact) => (
-              <FactCard key={fact.id} fact={fact} />
+              <FactCard key={fact.id} fact={fact} canEdit={canAct} />
             ))}
           </div>
         </section>

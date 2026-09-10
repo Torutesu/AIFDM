@@ -32,7 +32,7 @@ export async function updateFact(
   factId: string,
   data: { value?: string; isUserLocked?: boolean }
 ) {
-  const { organizationId } = await requireOrg();
+  const { organizationId } = await requireOrg({ minRole: "MEMBER" });
 
   const fact = await db.brainFact.findFirst({
     where: { id: factId, brain: { workspace: { organizationId } } },

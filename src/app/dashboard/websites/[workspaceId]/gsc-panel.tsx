@@ -6,9 +6,16 @@ import { selectSite, syncNow, loadSites } from "./actions";
 type Props = {
   workspaceId: string;
   integration: { id: string; siteUrl: string | null; lastSyncAt: Date | null } | null;
+  canAct: boolean;
+  canConfigure: boolean;
 };
 
-export function GscPanel({ workspaceId, integration }: Props) {
+export function GscPanel({
+  workspaceId,
+  integration,
+  canAct,
+  canConfigure,
+}: Props) {
   const [sites, setSites] = useState<{ siteUrl: string }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -23,12 +30,18 @@ export function GscPanel({ workspaceId, integration }: Props) {
         <p className="mb-3 text-sm text-neutral-500">
           Connect to see what you already rank for.
         </p>
-        <button
-          onClick={() => { window.location.href = connectUrl; }}
-          className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white dark:bg-white dark:text-neutral-900"
-        >
-          Connect
-        </button>
+        {canConfigure ? (
+          <button
+            onClick={() => { window.location.href = connectUrl; }}
+            className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-white dark:bg-white dark:text-neutral-900"
+          >
+            Connect
+          </button>
+        ) : (
+          <p className="text-xs text-neutral-500">
+            Only an admin can connect a Google account.
+          </p>
+        )}
       </div>
     );
   }
@@ -55,18 +68,24 @@ export function GscPanel({ workspaceId, integration }: Props) {
                 new Date(integration.lastSyncAt).toLocaleDateString()
               : ""}
           </p>
-          <button
-            onClick={() =>
-              startTransition(async () => {
-                await syncNow(integration.id);
-              })
-            }
-            disabled={pending}
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700"
-          >
-            {pending ? "Syncing…" : "Sync now"}
-          </button>
+          {canAct ? (
+            <button
+              onClick={() =>
+                startTransition(async () => {
+                  await syncNow(integration.id);
+                })
+              }
+              disabled={pending}
+              className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs dark:border-neutral-700"
+            >
+              {pending ? "Syncing…" : "Sync now"}
+            </button>
+          ) : null}
         </>
+      ) : !canConfigure ? (
+        <p className="text-sm text-neutral-500">
+          No property chosen yet. Only an admin can choose one.
+        </p>
       ) : sites ? (
         <div className="space-y-1">
           {sites.length === 0 ? (

@@ -31,9 +31,11 @@ const REASONS = [
 export function OpportunityList({
   items,
   workspaceId,
+  canAct,
 }: {
   items: Opportunity[];
   workspaceId: string;
+  canAct: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +154,7 @@ export function OpportunityList({
             </span>
           </div>
 
-          {dismissingId === o.id ? (
+          {!canAct ? null : dismissingId === o.id ? (
             <div className="space-y-2 rounded-md border border-neutral-200 p-3 dark:border-neutral-800">
               <p className="text-xs font-medium">Why are you dismissing this?</p>
 

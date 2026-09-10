@@ -23,9 +23,11 @@ function change(baseline: number, result: number) {
 export function ExperimentList({
   items,
   workspaceId,
+  canAct,
 }: {
   items: Experiment[];
   workspaceId: string;
+  canAct: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +118,7 @@ export function ExperimentList({
               <p className="text-xs text-neutral-500">{e.resultNote}</p>
             ) : null}
 
-            {e.status === "RUNNING" ? (
+            {e.status === "RUNNING" && canAct ? (
               openId === e.id ? (
                 <div className="space-y-2">
                   <div className="flex gap-2">

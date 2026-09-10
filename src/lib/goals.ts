@@ -27,7 +27,7 @@ export async function createGoal(input: {
   targetValue: number;
   days: number;
 }) {
-  const { organizationId } = await requireOrg();
+  const { organizationId } = await requireOrg({ minRole: "MEMBER" });
 
   const workspace = await db.workspace.findFirst({
     where: { id: input.workspaceId, organizationId },
