@@ -61,13 +61,11 @@ export function DigestPanel({ digest }: { digest: Digest }) {
   }
 
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
-      <p className="mb-2 text-sm font-medium text-amber-900 dark:text-amber-200">
-        Needs your attention
-      </p>
+    <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
+      <p className="mb-2 text-sm font-medium">Needs your attention</p>
       <ul className="space-y-1">
         {items.map((t, i) => (
-          <li key={i} className="text-sm text-amber-800 dark:text-amber-300">
+          <li key={i} className="text-sm text-neutral-600 dark:text-neutral-400">
             {t}
           </li>
         ))}
