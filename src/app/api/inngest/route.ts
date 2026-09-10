@@ -7,6 +7,7 @@ import { syncGsc } from "@/inngest/functions/sync-gsc";
 import { findOpportunities } from "@/inngest/functions/find-opportunities";
 import { generateContentDraft } from "@/inngest/functions/generate-content";
 import { publishDraft } from "@/inngest/functions/publish-draft";
+import { dailyRefresh } from "@/inngest/functions/daily-refresh";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -18,5 +19,6 @@ export const { GET, POST, PUT } = serve({
     findOpportunities,
     generateContentDraft,
     publishDraft,
+    dailyRefresh,
   ],
 });
