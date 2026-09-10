@@ -12,7 +12,7 @@ type Fact = {
   isUserLocked: boolean;
 };
 
-export function FactCard({ fact }: { fact: Fact }) {
+export function FactCard({ fact, canEdit }: { fact: Fact; canEdit: boolean }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(fact.value);
   const [locked, setLocked] = useState(fact.isUserLocked);
@@ -42,18 +42,24 @@ export function FactCard({ fact }: { fact: Fact }) {
           <span className="text-neutral-500">
             {Math.round(fact.confidence * 100)}%
           </span>
-          <button
-            onClick={toggleLock}
-            disabled={pending}
-            className={locked ? "text-amber-500" : "text-neutral-400"}
-            title={locked ? "Locked — AI won't overwrite" : "Lock this fact"}
-          >
-            {locked ? "🔒" : "🔓"}
-          </button>
+          {canEdit ? (
+            <button
+              onClick={toggleLock}
+              disabled={pending}
+              className={locked ? "text-amber-500" : "text-neutral-400"}
+              title={locked ? "Locked — AI won't overwrite" : "Lock this fact"}
+            >
+              {locked ? "🔒" : "🔓"}
+            </button>
+          ) : locked ? (
+            <span className="text-amber-500" title="Locked — AI won't overwrite">
+              🔒
+            </span>
+          ) : null}
         </div>
       </div>
 
-      {editing ? (
+      {editing && canEdit ? (
         <div className="space-y-2">
           <textarea
             value={value}
@@ -82,8 +88,10 @@ export function FactCard({ fact }: { fact: Fact }) {
         </div>
       ) : (
         <p
-          onClick={() => setEditing(true)}
-          className="cursor-text text-sm hover:opacity-70"
+          onClick={canEdit ? () => setEditing(true) : undefined}
+          className={
+            canEdit ? "cursor-text text-sm hover:opacity-70" : "text-sm"
+          }
         >
           {value}
         </p>

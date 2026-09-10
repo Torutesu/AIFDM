@@ -1,4 +1,5 @@
 import { listWorkspaces } from "@/lib/workspaces";
+import { requireOrg, hasRole } from "@/lib/tenancy";
 import { WorkspaceForm } from "./workspace-form";
 import Link from "next/link";
 
@@ -10,13 +11,14 @@ const statusLabel: Record<string, string> = {
 };
 
 export default async function WebsitesPage() {
+  const { role } = await requireOrg();
   const workspaces = await listWorkspaces();
 
   return (
     <div className="max-w-xl space-y-6">
       <h1 className="text-xl font-semibold tracking-tight">Websites</h1>
 
-      <WorkspaceForm />
+      {hasRole(role, "MEMBER") ? <WorkspaceForm /> : null}
 
       {workspaces.length === 0 ? (
         <p className="text-sm text-neutral-500">None yet.</p>

@@ -4,7 +4,7 @@ import { encrypt } from "@/lib/crypto/envelope";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const { organizationId } = await requireOrg();
+  const { organizationId } = await requireOrg({ minRole: "ADMIN" });
 
   const code = req.nextUrl.searchParams.get("code");
   const workspaceId = req.nextUrl.searchParams.get("state");

@@ -20,7 +20,7 @@ export async function startExperiment(input: {
   baselineValue: number;
   baselineNote?: string;
 }) {
-  const { organizationId, userId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg({ minRole: "MEMBER" });
 
   const draft = await db.contentDraft.findFirst({
     where: { id: input.draftId, workspace: { organizationId } },
@@ -58,7 +58,7 @@ export async function recordResult(input: {
   resultValue: number;
   resultNote?: string;
 }) {
-  const { organizationId, userId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg({ minRole: "MEMBER" });
 
   const experiment = await db.experiment.findFirst({
     where: { id: input.experimentId, workspace: { organizationId } },

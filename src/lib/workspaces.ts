@@ -13,7 +13,7 @@ export async function listWorkspaces() {
 }
 
 export async function createWorkspace(name: string, primaryDomain: string) {
-  const { organizationId } = await requireOrg();
+  const { organizationId } = await requireOrg({ minRole: "MEMBER" });
 
   const trimmedName = name.trim();
   if (!trimmedName) throw new Error("Name is required");

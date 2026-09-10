@@ -8,7 +8,7 @@ export async function decideDraft(input: {
   decision: "APPROVED" | "REJECTED";
   reason?: string;
 }) {
-  const { organizationId, userId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg({ minRole: "MEMBER" });
 
   const draft = await db.contentDraft.findFirst({
     where: {
@@ -43,7 +43,7 @@ export async function decideDraft(input: {
 }
 
 export async function regenerateDraft(draftId: string) {
-  const { organizationId, userId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg({ minRole: "MEMBER" });
 
   const draft = await db.contentDraft.findFirst({
     where: {
@@ -75,7 +75,7 @@ export async function regenerateDraft(draftId: string) {
 }
 
 export async function publishDraftById(draftId: string) {
-  const { organizationId, userId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg({ minRole: "MEMBER" });
 
   const draft = await db.contentDraft.findFirst({
     where: { id: draftId, workspace: { organizationId } },
@@ -107,7 +107,7 @@ export async function saveGithubSettings(input: {
   repo: string;
   path: string;
 }) {
-  const { organizationId } = await requireOrg();
+  const { organizationId } = await requireOrg({ minRole: "ADMIN" });
 
   const workspace = await db.workspace.findFirst({
     where: { id: input.workspaceId, organizationId },

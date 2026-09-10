@@ -152,13 +152,35 @@ action and then appear to do nothing.
 
 If step 2 never leaves `Queued`, Inngest is not connected (step 5 above).
 
+## Roles
+
+Membership roles are enforced in `requireOrg()`, which every query and mutation
+goes through. Reads are open to the whole organization; writes name the role
+they need, so a check cannot be forgotten silently.
+
+| | VIEWER | MEMBER | ADMIN | OWNER |
+|---|:---:|:---:|:---:|:---:|
+| See everything: facts, opportunities, drafts, experiments, spend | ✅ | ✅ | ✅ | ✅ |
+| Add a website, set a goal, edit facts | | ✅ | ✅ | ✅ |
+| Approve or dismiss an opportunity | | ✅ | ✅ | ✅ |
+| Approve, reject or regenerate a draft | | ✅ | ✅ | ✅ |
+| Publish a draft as a GitHub PR | | ✅ | ✅ | ✅ |
+| Start an experiment, record a result | | ✅ | ✅ | ✅ |
+| Sync Search Console now | | ✅ | ✅ | ✅ |
+| Set the GitHub repository to publish to | | | ✅ | ✅ |
+| Connect a Google account, choose a Search Console property | | | ✅ | ✅ |
+
+The UI follows the same rules — a viewer sees the data with the action buttons
+gone, not buttons that fail when clicked. The server check is the one that
+matters; the UI is a courtesy.
+
+Roles come from the `Membership` row, not from Clerk. New members default to
+`MEMBER`.
+
 ## Known limitations
 
 Read these before putting real customers on it.
 
-- **Roles are not enforced.** The `Role` enum (`OWNER`/`ADMIN`/`MEMBER`/`VIEWER`)
-  is stored but never checked. Any member of an organization can approve
-  opportunities, approve drafts and publish PRs.
 - **GitHub publishing uses one global token.** `GITHUB_TOKEN` is shared by every
   workspace, so a workspace can only publish to repositories that token can
   reach. Multi-tenant publishing needs a GitHub App instead.

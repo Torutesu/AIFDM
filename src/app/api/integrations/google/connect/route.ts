@@ -2,7 +2,7 @@ import { requireOrg } from "@/lib/tenancy";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  await requireOrg();
+  await requireOrg({ minRole: "ADMIN" });
 
   const workspaceId = req.nextUrl.searchParams.get("workspaceId");
   if (!workspaceId) {

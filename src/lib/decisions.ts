@@ -9,7 +9,7 @@ export async function decideOpportunity(input: {
   reason?: string;
   note?: string;
 }) {
-  const { organizationId, userId } = await requireOrg();
+  const { organizationId, userId } = await requireOrg({ minRole: "MEMBER" });
 
   const opportunity = await db.opportunity.findFirst({
     where: {

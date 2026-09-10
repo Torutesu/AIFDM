@@ -31,9 +31,11 @@ function scoreColor(score: number | null) {
 export function DraftList({
   items,
   workspaceId,
+  canAct,
 }: {
   items: Draft[];
   workspaceId: string;
+  canAct: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -146,7 +148,7 @@ export function DraftList({
               </pre>
             </div>
 
-            {d.status === "DRAFT" ? (
+            {d.status === "DRAFT" && canAct ? (
               rejectingId === d.id ? (
                 <div className="space-y-2">
                   <input
@@ -193,7 +195,7 @@ export function DraftList({
                   </button>
                 </div>
               )
-            ) : d.status === "APPROVED" ? (
+            ) : d.status === "APPROVED" && canAct ? (
               <button
                 onClick={() => publish(d.id)}
                 disabled={pending}
@@ -213,9 +215,11 @@ export function DraftList({
                     View pull request
                   </a>
                 ) : null}
-                <ExperimentForm draftId={d.id} workspaceId={workspaceId} />
+                {canAct ? (
+                  <ExperimentForm draftId={d.id} workspaceId={workspaceId} />
+                ) : null}
               </div>
-            ) : d.status === "REJECTED" ? (
+            ) : d.status === "REJECTED" && canAct ? (
               <button
                 onClick={() => regenerate(d.id)}
                 disabled={pending}

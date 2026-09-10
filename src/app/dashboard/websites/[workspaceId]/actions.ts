@@ -29,8 +29,11 @@ export async function saveFact(
   }
 }
 
-async function assertOwns(integrationId: string) {
-  const { organizationId } = await requireOrg();
+async function assertOwns(
+  integrationId: string,
+  minRole?: "MEMBER" | "ADMIN"
+) {
+  const { organizationId } = await requireOrg({ minRole });
   const integration = await db.integration.findFirst({
     where: { id: integrationId, workspace: { organizationId } },
   });
@@ -53,7 +56,7 @@ export async function loadSites(integrationId: string) {
 
 export async function selectSite(integrationId: string, siteUrl: string) {
   try {
-    await assertOwns(integrationId);
+    await assertOwns(integrationId, "ADMIN");
     await db.integration.update({
       where: { id: integrationId },
       data: { siteUrl },
@@ -71,7 +74,7 @@ export async function selectSite(integrationId: string, siteUrl: string) {
 
 export async function syncNow(integrationId: string) {
   try {
-    await assertOwns(integrationId);
+    await assertOwns(integrationId, "MEMBER");
     await inngest.send({
       name: "gsc/sync.requested",
       data: { integrationId },
